@@ -26,12 +26,14 @@ public class LockController {
 
     @GetMapping(value = "/status/file/{fileName}")
     public Boolean getLockStatusForCurrentFile(@PathVariable String fileName){
+        log.info( "Inside getLockStatusForCurrentFile" );
         iLockService.getLockStatusForCurrentFile( fileName );
         return Boolean.FALSE;
     }
 
     @GetMapping(value = "/status/folder/{folderName}")
     public Boolean getLockStatusForCurrentFolder(@PathVariable String folderName){
+        log.info( "Inside getLockStatusForCurrentFolder" );
         iLockService.getLockStatusForCurrentFolder( folderName );
         return Boolean.FALSE;
     }

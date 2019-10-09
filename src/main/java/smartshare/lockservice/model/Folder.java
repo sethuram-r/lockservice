@@ -7,7 +7,7 @@ import org.springframework.data.redis.core.index.Indexed;
 
 import java.util.List;
 
-@RedisHash(value = "lock")
+@RedisHash(value = "lock", timeToLive = 60)
 public class Folder {
 
     @Id
