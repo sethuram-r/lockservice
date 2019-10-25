@@ -7,63 +7,63 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
-import smartshare.lockservice.model.File;
-import smartshare.lockservice.model.Folder;
-import smartshare.lockservice.repository.FileRepository;
-import smartshare.lockservice.repository.FolderRepository;
+import smartshare.lockservice.model.S3Object;
+import smartshare.lockservice.model.S3ObjectsWrapper;
+import smartshare.lockservice.repository.ObjectRepository;
 
 import java.io.IOException;
 
-import static smartshare.lockservice.constant.KafkaKeys.FILE;
-import static smartshare.lockservice.constant.KafkaKeys.FOLDER;
+import static smartshare.lockservice.constant.KafkaKeys.OBJECT;
+import static smartshare.lockservice.constant.KafkaKeys.OBJECTS;
 
 @Slf4j
 @Service
 public class LockServiceWrites {
 
-    private FileRepository fileRepository;
 
-    private FolderRepository folderRepository;
+    private ObjectRepository objectRepository;
 
     private ObjectMapper jsonConverter;
 
 
     @Autowired
-    LockServiceWrites(FileRepository fileRepository, FolderRepository folderRepository,ObjectMapper jsonConverter ){
-        this.fileRepository = fileRepository;
-        this.folderRepository = folderRepository;
+    LockServiceWrites(ObjectRepository objectRepository, ObjectMapper jsonConverter) {
+        this.objectRepository = objectRepository;
         this.jsonConverter = jsonConverter;
     }
 
 
-    @KafkaListener(topics = "lock")
-    public void consume(String fileOrFolderObjectInJsonAsStringFormat, ConsumerRecord record) throws IOException {
-        System.out.println("fileOrFolderObjectInJsonAsStringFormat------------->"+fileOrFolderObjectInJsonAsStringFormat);
+    @KafkaListener(groupId = "lockConsumer", topics = "lock")
+    public void consume(String objectInJsonAsStringFormat, ConsumerRecord record) throws IOException {
+        System.out.println( "fileOrFolderObjectInJsonAsStringFormat------------->" + objectInJsonAsStringFormat );
         System.out.println("record--------->"+record);
-        if (record.key() == ( FILE )){
-            log.info( "Consumed File Lock Event" );
-            File result = jsonConverter.readValue( fileOrFolderObjectInJsonAsStringFormat, File.class );
-            System.out.println("result----file----->"+result);
+
+        if (record.key() == (OBJECT)) {
+            log.info( "Consumed Object Lock Event" );
+            S3Object objectWhoseLockStatusHasToBeChanged = jsonConverter.readValue( objectInJsonAsStringFormat, S3Object.class );
+            System.out.println( "result----object----->" + objectWhoseLockStatusHasToBeChanged );
             try {
-                File result2 = fileRepository.save( result );
-                System.out.println( "result----file----->" + result2 );
+                S3Object savedObject = objectRepository.save( objectWhoseLockStatusHasToBeChanged );
+                System.out.println( "result----Objects----->" + savedObject );
             } catch (Exception e) {
                 log.error( String.format( "Error occurred while persisting the file lock event %s", e.getMessage() ) );
             }
 
+        }
+        if (record.key() == (OBJECTS)) {
+            log.info( "Consumed Objects Lock Event" );
+            S3ObjectsWrapper objectsWhoseLockStatusHasToBeChanged = jsonConverter.readValue( objectInJsonAsStringFormat, S3ObjectsWrapper.class );
+            System.out.println( "result----file----->" + objectsWhoseLockStatusHasToBeChanged );
+            try {
+                Iterable<S3Object> savedObjects = objectRepository.saveAll( objectsWhoseLockStatusHasToBeChanged );
+                savedObjects.forEach( s3Object -> System.out.println( s3Object.getLockStatus() ) );
+            } catch (Exception e) {
+                log.error( String.format( "Error occurred while persisting the file lock event %s", e.getMessage() ) );
+            }
 
         }
-        if (record.key() == ( FOLDER )){
-            log.info( "Consumed Folder Lock Event" );
-            Folder result = jsonConverter.readValue(fileOrFolderObjectInJsonAsStringFormat, Folder.class);
-            System.out.println("result----folder----->"+result);
-            try {
-                Folder result2 = folderRepository.save( result );
-                System.out.println( "result----folder----->" + result2 );
-            } catch (Exception e) {
-                log.error( String.format( "Error occurred while persisting the folder lock event %s", e.getMessage() ) );
-            }
-        }
+
+
     }
 
 }

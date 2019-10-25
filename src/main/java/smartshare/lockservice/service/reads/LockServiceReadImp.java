@@ -2,37 +2,26 @@ package smartshare.lockservice.service.reads;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import smartshare.lockservice.model.File;
-import smartshare.lockservice.repository.FileRepository;
-import smartshare.lockservice.repository.FolderRepository;
-
+import smartshare.lockservice.model.S3Object;
+import smartshare.lockservice.repository.ObjectRepository;
 
 import java.util.Optional;
 
 @Service(value = "redisLockReadService")
 public class LockServiceReadImp implements ILockService {
 
-    private FileRepository fileRepository;
 
-    private FolderRepository folderRepository;
+    private ObjectRepository objectRepository;
 
     @Autowired
-    LockServiceReadImp(FileRepository fileRepository, FolderRepository folderRepository){
-        this.fileRepository = fileRepository;
-        this.folderRepository = folderRepository;
+    LockServiceReadImp(ObjectRepository objectRepository) {
+        this.objectRepository = objectRepository;
     }
 
-    @Override
-    public Boolean getLockStatusForCurrentFile(String fileName) {
-
-        Optional<File> currentFileWhoseLockStatusIsNeeded = fileRepository.findById( fileName );
-        //not sure how it works
-        return currentFileWhoseLockStatusIsNeeded.map( File::getLockStatus ).orElse( null );
-    }
 
     @Override
-    public Boolean getLockStatusForCurrentFolder(String folderName) {
-        folderRepository.findById( folderName );
-        return null;
+    public Boolean getLockStatusOfObject(String objectName) {
+        Optional<S3Object> currentObjectWhoseLockStatusIsNeeded = objectRepository.findById( objectName );
+        return currentObjectWhoseLockStatusIsNeeded.map( S3Object::getLockStatus ).orElse( null );
     }
 }

@@ -1,24 +1,24 @@
 package smartshare.lockservice.model;
 
-
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.index.Indexed;
 
+
 @RedisHash(value = "lock", timeToLive = 60)
-public class File {
+public class S3Object {
 
     @Id
     @Indexed
-    private String fileName;
+    private String objectName;
     private Boolean lockStatus;
 
-    File(String fileName){
-        this.fileName = fileName;
+    S3Object(String fileName) {
+        this.objectName = fileName;
     }
 
-    public String getFileName() {
-        return fileName;
+    public String getObjectName() {
+        return objectName;
     }
 
     public Boolean getLockStatus() {
