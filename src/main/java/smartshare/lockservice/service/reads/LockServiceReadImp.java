@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 import smartshare.lockservice.model.S3Object;
 import smartshare.lockservice.repository.ObjectRepository;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service(value = "redisLockReadService")
@@ -24,4 +26,14 @@ public class LockServiceReadImp implements ILockService {
         Optional<S3Object> currentObjectWhoseLockStatusIsNeeded = objectRepository.findById( objectName );
         return currentObjectWhoseLockStatusIsNeeded.map( S3Object::getLockStatus ).orElse( null );
     }
+
+    public List<Boolean> getLockStatusOfObjects(List<String> objectNames) {
+
+        List<Boolean> lockStatusOfRequiredObjects = new ArrayList<>();
+        objectNames.forEach( objectName -> {
+            lockStatusOfRequiredObjects.add( getLockStatusOfObject( objectName ) );
+        } );
+        return lockStatusOfRequiredObjects;
+    }
+
 }
