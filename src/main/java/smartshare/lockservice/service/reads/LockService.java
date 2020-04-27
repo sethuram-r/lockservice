@@ -40,7 +40,7 @@ public class LockService {
     private void lockObject(S3Object s3Object) {
         log.info( "Inside lockObject" );
         try {
-            objectRepository.save( s3Object );
+            S3Object result = objectRepository.save( s3Object );
         } catch (Exception e) {
             log.error( "Error while locking the Object " + s3Object + " " + e );
         }
@@ -61,6 +61,7 @@ public class LockService {
         log.info( "Inside unLockObject" );
         try {
             Optional<S3Object> isObjectExists = objectRepository.findByObjectName( s3Object.getObjectName() );
+            System.out.println( "isObjectExists--------->" + isObjectExists );
             isObjectExists.ifPresent( objectRepository::delete );
         } catch (Exception e) {
             log.error( "Error while locking the Object " + s3Object + " " + e );

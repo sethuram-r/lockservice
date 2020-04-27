@@ -26,7 +26,7 @@ public class LockServiceWrites {
     }
 
 
-    @KafkaListener(groupId = "lockConsumer", topics = "lock")
+    @KafkaListener(groupId = "lockConsumer", topics = "lock1")
     public void consume(S3Object[] s3Object, ConsumerRecord record) {
 
         switch (record.key().toString()) {

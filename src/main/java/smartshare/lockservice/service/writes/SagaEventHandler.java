@@ -4,7 +4,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.KafkaHeaders;
+import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 import smartshare.lockservice.model.SagaEvent;
 import smartshare.lockservice.service.reads.LockService;
@@ -28,6 +31,7 @@ public class SagaEventHandler {
         sagaEventResult.setEventId( sagaEvent.getEventId() );
         sagaEventResult.setStatus( lockService.lockObjects( sagaEvent.getObjects() ) ? "success" : "failed" );
         sagaEventResult.setObjects( sagaEvent.getObjects() );
+        System.out.println( " Result--->" + sagaEventResult );
 //        sagaEventResult.setObjects( sagaEvent.getObjects() ); testing..
         return sagaEventResult;
     }
@@ -38,6 +42,7 @@ public class SagaEventHandler {
         sagaEventResult.setEventId( sagaEvent.getEventId() );
         sagaEventResult.setStatus( lockService.unLockObjects( sagaEvent.getObjects() ) ? "success" : "failed" );
         sagaEventResult.setObjects( sagaEvent.getObjects() );
+        System.out.println( " Result--->" + sagaEventResult );
         return sagaEventResult;
     }
 
@@ -50,26 +55,40 @@ public class SagaEventHandler {
 //    }
 
 
-    @KafkaListener(groupId = "sagaEventConsumer", topics = "sagaLock", containerFactory = "SagaEventKafkaListenerContainerFactory")
+    @KafkaListener(groupId = "sagaEventConsumer", topics = "sagaLock5", containerFactory = "SagaEventKafkaListenerContainerFactory")
     @SendTo("sagaLockResult")
-    public SagaEvent consume(SagaEvent sagaEvent, ConsumerRecord record) {
+    public Message<SagaEvent> consume(SagaEvent sagaEvent, ConsumerRecord record) {
+
+        System.out.println( "SagaEvent--- " + sagaEvent );
 
         try {
 
             switch (record.key().toString()) {
                 case "lock":
                     log.info( "Consumed lock saga Events" );
-                    return this.lockEventHandler( sagaEvent );
+                    return MessageBuilder
+                            .withPayload( this.lockEventHandler( sagaEvent ) )
+                            .setHeader( KafkaHeaders.TOPIC, "sagaLockResult" )
+                            .setHeader( KafkaHeaders.MESSAGE_KEY, record.key() )
+                            .build();
+
                 case "unlock":
                     log.info( "Consumed unlock saga Events" );
-                    return this.unLockEventHandler( sagaEvent );
+                    return MessageBuilder
+                            .withPayload( this.unLockEventHandler( sagaEvent ) )
+                            .setHeader( KafkaHeaders.TOPIC, "sagaLockResult" )
+                            .setHeader( KafkaHeaders.MESSAGE_KEY, record.key() )
+                            .build();
                 default:
                     log.error( "Unsupported Lock event" );
             }
         } catch (Exception e) {
             log.error( "Exception while handling the LockConsumer events " + e.getMessage() );
         }
-
-        return sagaEvent;
+        return MessageBuilder
+                .withPayload( sagaEvent )
+                .setHeader( KafkaHeaders.TOPIC, "sagaLockResult" )
+                .setHeader( KafkaHeaders.MESSAGE_KEY, record.key() )
+                .build();
     }
 }
