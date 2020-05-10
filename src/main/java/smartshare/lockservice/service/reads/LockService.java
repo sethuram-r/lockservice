@@ -25,7 +25,7 @@ public class LockService {
     public Boolean getLockStatusOfObject(String objectName) { // for file
         log.info( "Inside getLockStatusOfObject" );
         Optional<S3Object> isRecordExists = objectRepository.findByObjectName( objectName );
-        System.out.println( "isRecordExists------->" + isRecordExists );
+
         return isRecordExists.isPresent() ? Boolean.TRUE : Boolean.FALSE;
     }
 
@@ -33,7 +33,7 @@ public class LockService {
     public Boolean getLockStatusOfObjects(String objectName) { // for folder
         log.info( "Inside getLockStatusOfObjects" );
         List<S3Object> isLockedRecordExists = objectRepository.findAllByObjectNameStartingWith( objectName );
-        System.out.println( "isLockedRecordExists------->" + isLockedRecordExists );
+
         return isLockedRecordExists.size() > 1 ? Boolean.TRUE : Boolean.FALSE;
     }
 
@@ -61,7 +61,7 @@ public class LockService {
         log.info( "Inside unLockObject" );
         try {
             Optional<S3Object> isObjectExists = objectRepository.findByObjectName( s3Object.getObjectName() );
-            System.out.println( "isObjectExists--------->" + isObjectExists );
+
             isObjectExists.ifPresent( objectRepository::delete );
         } catch (Exception e) {
             log.error( "Error while locking the Object " + s3Object + " " + e );

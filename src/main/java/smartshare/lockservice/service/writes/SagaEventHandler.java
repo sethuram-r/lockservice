@@ -31,7 +31,7 @@ public class SagaEventHandler {
         sagaEventResult.setEventId( sagaEvent.getEventId() );
         sagaEventResult.setStatus( lockService.lockObjects( sagaEvent.getObjects() ) ? "success" : "failed" );
         sagaEventResult.setObjects( sagaEvent.getObjects() );
-        System.out.println( " Result--->" + sagaEventResult );
+
 //        sagaEventResult.setObjects( sagaEvent.getObjects() ); testing..
         return sagaEventResult;
     }
@@ -42,7 +42,7 @@ public class SagaEventHandler {
         sagaEventResult.setEventId( sagaEvent.getEventId() );
         sagaEventResult.setStatus( lockService.unLockObjects( sagaEvent.getObjects() ) ? "success" : "failed" );
         sagaEventResult.setObjects( sagaEvent.getObjects() );
-        System.out.println( " Result--->" + sagaEventResult );
+
         return sagaEventResult;
     }
 
