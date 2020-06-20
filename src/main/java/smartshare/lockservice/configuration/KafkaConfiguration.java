@@ -1,5 +1,6 @@
 package smartshare.lockservice.configuration;
 
+import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -8,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
+import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.*;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
@@ -21,8 +23,8 @@ import java.util.Map;
 @Configuration
 public class KafkaConfiguration {
 
-    private Map<String, Object> consumerConfigurationProperties = new HashMap<>();
-    private Map<String, Object> producerConfigurationProperties = new HashMap<>();
+    private final Map<String, Object> consumerConfigurationProperties = new HashMap<>();
+    private final Map<String, Object> producerConfigurationProperties = new HashMap<>();
 
     public KafkaConfiguration() {
         producerConfigurationProperties.put( ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "127.0.0.1:9092" );
@@ -64,10 +66,25 @@ public class KafkaConfiguration {
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, SagaEvent> SagaEventKafkaListenerContainerFactory() {
+    public ConcurrentKafkaListenerContainerFactory<String, SagaEvent> sagaEventKafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, SagaEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory( sagaEventConsumerFactory() );
         factory.setReplyTemplate( sagaEventKafkaTemplate() );
         return factory;
+    }
+
+    @Bean
+    public NewTopic lockTopic() {
+        return TopicBuilder.name( "lock" ).compact().build();
+    }
+
+    @Bean
+    public NewTopic sagaLockTopic() {
+        return TopicBuilder.name( "sagaLock" ).compact().build();
+    }
+
+    @Bean
+    public NewTopic sagaLockResultTopic() {
+        return TopicBuilder.name( "sagaLockResult" ).compact().build();
     }
 }

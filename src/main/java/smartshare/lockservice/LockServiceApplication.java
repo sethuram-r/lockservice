@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class LockserviceApplication {
+public class LockServiceApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run( LockserviceApplication.class, args );
+        SpringApplication.run( LockServiceApplication.class, args );
     }
 
 }

@@ -10,8 +10,6 @@ import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.index.Indexed;
 
 
-
-
 @RedisHash(value = "lock", timeToLive = 60)
 @AllArgsConstructor
 @NoArgsConstructor

@@ -17,7 +17,7 @@ import java.util.Arrays;
 public class LockServiceWrites {
 
 
-    private LockService lockService;
+    private final LockService lockService;
 
 
     @Autowired
@@ -26,7 +26,7 @@ public class LockServiceWrites {
     }
 
 
-    @KafkaListener(groupId = "lockConsumer", topics = "lock3")
+    @KafkaListener(groupId = "lockConsumer", topics = "lock")
     public void consume(S3Object[] s3Object, ConsumerRecord record) {
 
         switch (record.key().toString()) {

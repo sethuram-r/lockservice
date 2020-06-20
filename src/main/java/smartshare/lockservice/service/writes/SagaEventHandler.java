@@ -17,7 +17,7 @@ import smartshare.lockservice.service.reads.LockService;
 @Service
 public class SagaEventHandler {
 
-    private LockService lockService;
+    private final LockService lockService;
 
     @Autowired
     SagaEventHandler(LockService lockService) {
@@ -46,16 +46,8 @@ public class SagaEventHandler {
         return sagaEventResult;
     }
 
-    // Testing
 
-//    @KafkaListener(groupId = "sagaLockResultConsumer",topics = "sagaLockResult")
-//    public void result(SagaEvent results) {
-//        log.info( "Inside sagaEventResultConsumer" );
-//        System.out.println( results);
-//    }
-
-
-    @KafkaListener(groupId = "sagaEventConsumer", topics = "sagaLock5", containerFactory = "SagaEventKafkaListenerContainerFactory")
+    @KafkaListener(groupId = "sagaEventConsumer", topics = "sagaLock", containerFactory = "sagaEventKafkaListenerContainerFactory")
     @SendTo("sagaLockResult")
     public Message<SagaEvent> consume(SagaEvent sagaEvent, ConsumerRecord record) {
 

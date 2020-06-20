@@ -13,8 +13,7 @@ import java.util.Optional;
 @Slf4j
 public class LockService {
 
-
-    private ObjectRepository objectRepository;
+    private final ObjectRepository objectRepository;
 
     @Autowired
     LockService(ObjectRepository objectRepository) {
@@ -22,25 +21,10 @@ public class LockService {
     }
 
 
-    public Boolean getLockStatusOfObject(String objectName) { // for file
-        log.info( "Inside getLockStatusOfObject" );
-        Optional<S3Object> isRecordExists = objectRepository.findByObjectName( objectName );
-
-        return isRecordExists.isPresent() ? Boolean.TRUE : Boolean.FALSE;
-    }
-
-
-    public Boolean getLockStatusOfObjects(String objectName) { // for folder
-        log.info( "Inside getLockStatusOfObjects" );
-        List<S3Object> isLockedRecordExists = objectRepository.findAllByObjectNameStartingWith( objectName );
-
-        return isLockedRecordExists.size() > 1 ? Boolean.TRUE : Boolean.FALSE;
-    }
-
     private void lockObject(S3Object s3Object) {
         log.info( "Inside lockObject" );
         try {
-            S3Object result = objectRepository.save( s3Object );
+            objectRepository.save( s3Object );
         } catch (Exception e) {
             log.error( "Error while locking the Object " + s3Object + " " + e );
         }
@@ -52,7 +36,7 @@ public class LockService {
             s3Objects.forEach( this::lockObject );
             return Boolean.TRUE;
         } catch (Exception e) {
-            log.error( "Error while locking the Object " + s3Objects + " " + e );
+            log.error( "Error while locking the Objects " + s3Objects + " " + e );
         }
         return Boolean.FALSE;
     }
@@ -64,7 +48,7 @@ public class LockService {
 
             isObjectExists.ifPresent( objectRepository::delete );
         } catch (Exception e) {
-            log.error( "Error while locking the Object " + s3Object + " " + e );
+            log.error( "Error while unlocking the Object " + s3Object + " " + e );
         }
     }
 
@@ -74,7 +58,7 @@ public class LockService {
             s3Objects.forEach( this::unLockObject );
             return Boolean.TRUE;
         } catch (Exception e) {
-            log.error( "Error while locking the Object " + s3Objects + " " + e );
+            log.error( "Error while unlocking the Objects " + s3Objects + " " + e );
         }
         return Boolean.FALSE;
     }
